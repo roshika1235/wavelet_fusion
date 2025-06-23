@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}New Fusion - Wavelet Fusion App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-plus-circle fa-3x text-primary mb-3"></i>
+                        <h2 class="card-title">New Fusion Session</h2>
+                        <p class="text-muted">Configure your image fusion parameters</p>
+                    </div>
+                    
+                    <form method="POST">
+                        <div class="mb-4">
+                            <label for="session_name" class="form-label">Session Name</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-tag"></i>
+                                </span>
+                                <input type="text" class="form-control" id="session_name" name="session_name" 
+                                       placeholder="e.g., Medical Scan Fusion" required>
+                            </div>
+                            <div class="form-text">Give your fusion session a descriptive name</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="num_images" class="form-label">Number of Images to Fuse</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-images"></i>
+                                </span>
+                                <select class="form-select" id="num_images" name="num_images" required>
+                                    <option value="">Select number of images</option>
+                                    <option value="2">2 Images</option>
+                                    <option value="3">3 Images</option>
+                                    <option value="4">4 Images</option>
+                                    <option value="5">5 Images</option>
+                                    <option value="6">6 Images</option>
+                                    <option value="7">7 Images</option>
+                                    <option value="8">8 Images</option>
+                                    <option value="9">9 Images</option>
+                                    <option value="10">10 Images</option>
+                                </select>
+                            </div>
+                            <div class="form-text">Choose how many images you want to combine (2-10)</div>
+                        </div>
+                        
+                        <!-- Fusion Algorithm Info -->
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">
+                                <i class="fas fa-info-circle me-2"></i>Fusion Algorithm
+                            </h6>
+                            <p class="mb-0">
+                                This application uses <strong>Discrete Wavelet Transform (DWT)</strong> 
+                                with Daubechies-4 wavelets for superior image fusion quality.
+                            </p>
+                        </div>
+                        
+                        <!-- Supported Formats -->
+                        <div class="mb-4">
+                            <h6><i class="fas fa-file-image me-2"></i>Supported Formats</h6>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-secondary">JPEG</span>
+                                <span class="badge bg-secondary">PNG</span>
+                                <span class="badge bg-secondary">TIFF</span>
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-arrow-right me-2"></i>Continue to Upload
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add upload template for next step -->
+<script id="upload-template" type="text/template">
+{% raw %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-upload fa-3x text-success mb-3"></i>
+                        <h2>Upload Images</h2>
+                        <p class="text-muted">Upload {{num_images}} images for fusion</p>
+                    </div>
+                    
+                    <div class="upload-area border-2 border-dashed rounded p-5 text-center mb-4" 
+                         ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <p class="mb-3">Drag and drop images here or click to browse</p>
+                        <input type="file" id="imageInput" multiple accept=".jpg,.jpeg,.png,.tiff,.tif" 
+                               style="display: none;" onchange="handleFileSelect(event)">
+                        <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('imageInput').click()">
+                            <i class="fas fa-folder-open me-2"></i>Browse Files
+                        </button>
+                    </div>
+                    
+                    <div id="imagePreview" class="row g-3"></div>
+                    
+                    <div class="text-center mt-4">
+                        <button id="processBtn" class="btn btn-success btn-lg" disabled onclick="processFusion()">
+                            <i class="fas fa-cog me-2"></i>Process Fusion
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endraw %}
+</script>
+{% endblock %}
+

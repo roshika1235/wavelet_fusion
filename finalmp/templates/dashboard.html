@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Wavelet Fusion App{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-6 mb-2">
+                        <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                    </h1>
+                    <p class="text-muted mb-0">Welcome back, {{ current_user.username }}!</p>
+                </div>
+                <div>
+                    <a href="{{ url_for('fusion') }}" class="btn btn-primary btn-lg">
+                        <i class="fas fa-plus me-2"></i>New Fusion
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="row g-4 mb-5">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-layer-group fa-2x text-primary mb-2"></i>
+                    <h3 class="fw-bold">{{ fusion_sessions|length }}</h3>
+                    <p class="text-muted mb-0">Total Sessions</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-check-circle fa-2x text-success mb-2"></i>
+                    <h3 class="fw-bold">{{ fusion_sessions|selectattr('status', 'equalto', 'completed')|list|length }}</h3>
+                    <p class="text-muted mb-0">Completed</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-clock fa-2x text-warning mb-2"></i>
+                    <h3 class="fw-bold">{{ fusion_sessions|selectattr('status', 'equalto', 'pending')|list|length }}</h3>
+                    <p class="text-muted mb-0">Pending</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body text-center">
+                    <i class="fas fa-cog fa-2x text-info mb-2"></i>
+                    <h3 class="fw-bold">{{ fusion_sessions|selectattr('status', 'equalto', 'processing')|list|length }}</h3>
+                    <p class="text-muted mb-0">Processing</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fusion Sessions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-transparent border-0 py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-history me-2"></i>Fusion Sessions
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if fusion_sessions %}
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Session Name</th>
+                                        <th>Images</th>
+                                        <th>Status</th>
+                                        <th>Created</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for session in fusion_sessions %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                <i class="fas fa-layer-group me-2 text-muted"></i>
+                                                <strong>{{ session.session_name }}</strong>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-secondary">
+                                                {{ session.images|length }}/{{ session.num_images }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {% if session.status == 'completed' %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Completed
+                                                </span>
+                                            {% elif session.status == 'processing' %}
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-cog fa-spin me-1"></i>Processing
+                                                </span>
+                                            {% elif session.status == 'failed' %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>Failed
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-secondary">
+                                                    <i class="fas fa-clock me-1"></i>Pending
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                            <small class="text-muted">
+                                                {{ session.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group btn-group-sm">
+                                                {% if session.status == 'completed' %}
+                                                    <a href="{{ url_for('view_result', session_id=session.id) }}" 
+                                                       class="btn btn-outline-primary btn-sm" 
+                                                       title="View Result">
+                                                        <i class="fas fa-eye"></i>
+                                                    </a>
+                                                    <a href="{{ url_for('download_result', session_id=session.id) }}" 
+                                                       class="btn btn-outline-success btn-sm" 
+                                                       title="Download">
+                                                        <i class="fas fa-download"></i>
+                                                    </a>
+                                                {% elif session.status == 'pending' and session.images|length < session.num_images %}
+                                                    <a href="{{ url_for('upload_images', session_id=session.id) }}" 
+                                                       class="btn btn-outline-warning btn-sm" 
+                                                       title="Continue Upload">
+                                                        <i class="fas fa-upload"></i>
+                                                    </a>
+                                                {% endif %}
+                                                
+                                                <form method="POST" action="{{ url_for('delete_session', session_id=session.id) }}" 
+                                                      class="d-inline" onsubmit="return confirm('Are you sure you want to delete this session?')">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-layer-group fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No fusion sessions yet</h5>
+                            <p class="text-muted mb-4">Create your first fusion session to get started</p>
+                            <a href="{{ url_for('fusion') }}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>Create Fusion Session
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

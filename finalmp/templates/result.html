@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+
+{% block title %}Fusion Result - Wavelet Fusion App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                <h1 class="display-6">Fusion Complete!</h1>
+                <p class="lead text-muted">Your images have been successfully fused using DWT algorithm</p>
+            </div>
+
+            <!-- Session Info -->
+            <div class="card shadow mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title mb-2">
+                                <i class="fas fa-layer-group me-2"></i>{{ fusion_session.session_name }}
+                            </h5>
+                            <div class="row text-sm">
+                                <div class="col-sm-6">
+                                    <p class="mb-1">
+                                        <strong>Images Fused:</strong> {{ fusion_session.num_images }}
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Created:</strong> {{ fusion_session.created_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </p>
+                                </div>
+                                <div class="col-sm-6">
+                                    <p class="mb-1">
+                                        <strong>Completed:</strong> {{ fusion_session.completed_at.strftime('%Y-%m-%d %H:%M') }}
+                                    </p>
+                                    <p class="mb-1">
+                                        <strong>Algorithm:</strong> DWT (Daubechies-4)
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="btn-group">
+                                <a href="{{ url_for('download_result', session_id=fusion_session.id) }}" 
+                                   class="btn btn-success btn-lg">
+                                    <i class="fas fa-download me-2"></i>Download
+                                </a>
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                                    <i class="fas fa-tachometer-alt me-2"></i>Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Result Image -->
+            <div class="card shadow">
+                <div class="card-header bg-transparent">
+                    <h5 class="card-title mb-0">
+                        <i class="fas fa-image me-2"></i>Fused Result
+                    </h5>
+                </div>
+                <div class="card-body text-center">
+                    <div class="result-image-container mb-4">
+                        <img src="{{ url_for('static', filename='../results/' + fusion_session.result_filename) }}" 
+                             class="img-fluid rounded shadow" 
+                             alt="Fused Image Result"
+                             style="max-height: 600px; object-fit: contain;">
+                    </div>
+                    <div class="image-info">
+                        <div class="row justify-content-center">
+                            <div class="col-md-6">
+                                <div class="alert alert-success">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-info-circle me-2"></i>Fusion Details
+                                    </h6>
+                                    <ul class="list-unstyled mb-0">
+                                        <li><strong>Format:</strong> PNG (High Quality)</li>
+                                        <li><strong>Algorithm:</strong> Discrete Wavelet Transform</li>
+                                        <li><strong>Wavelet:</strong> Daubechies-4 (db4)</li>
+                                        <li><strong>Enhancement:</strong> Contrast optimization applied</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="text-center mt-4">
+                <div class="btn-group">
+                    <a href="{{ url_for('fusion') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>New Fusion
+                    </a>
+                    <a href="{{ url_for('download_result', session_id=fusion_session.id) }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-download me-2"></i>Download Result
+                    </a>
+                    <button type="button" class="btn btn-outline-secondary" onclick="shareResult()">
+                        <i class="fas fa-share me-2"></i>Share
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function shareResult() {
+    if (navigator.share) {
+        navigator.share({
+            title: 'Wavelet Fusion Result',
+            text: 'Check out my image fusion result created with DWT algorithm!',
+            url: window.location.href
+        });
+    } else {
+        // Fallback - copy to clipboard
+        navigator.clipboard.writeText(window.location.href).then(() => {
+            alert('Link copied to clipboard!');
+        });
+    }
+}
+</script>
+{% endblock %}
+

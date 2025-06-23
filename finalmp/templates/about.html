@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block title %}About - Wavelet Fusion App{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="bg-primary text-white py-5">
+    <div class="container">
+        <div class="row">
+            <div class="col-12 text-center">
+                <h1 class="display-4 fw-bold mb-3">
+                    <i class="fas fa-info-circle me-3"></i>About Wavelet Fusion
+                </h1>
+                <p class="lead">Advanced image fusion using cutting-edge signal processing techniques</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container py-5">
+    <!-- What is Wavelet Fusion -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold mb-4">What is Wavelet Fusion?</h2>
+            <div class="row">
+                <div class="col-lg-8">
+                    <p class="lead">
+                        Wavelet fusion is an advanced image processing technique that combines multiple images 
+                        into a single enhanced result by analyzing frequency components using wavelet transforms.
+                    </p>
+                    <p>
+                        Unlike simple averaging or basic blending techniques, wavelet fusion preserves important 
+                        details from all input images while enhancing contrast and feature visibility. This makes 
+                        it ideal for applications in medical imaging, surveillance, satellite imagery, and 
+                        scientific visualization.
+                    </p>
+                </div>
+                <div class="col-lg-4">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body text-center">
+                            <i class="fas fa-wave-square fa-4x text-primary mb-3"></i>
+                            <h5>DWT Algorithm</h5>
+                            <p class="small mb-0">Discrete Wavelet Transform with Daubechies-4 wavelets</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- How It Works -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold mb-4">How Does It Work?</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-primary text-white rounded-circle p-2 me-3">
+                                    <i class="fas fa-layer-group"></i>
+                                </div>
+                                <h5 class="mb-0">Wavelet Decomposition</h5>
+                            </div>
+                            <p>
+                                Each input image is decomposed into multiple frequency subbands using 
+                                Discrete Wavelet Transform (DWT). This separates low-frequency (approximation) 
+                                and high-frequency (detail) components.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-success text-white rounded-circle p-2 me-3">
+                                    <i class="fas fa-balance-scale"></i>
+                                </div>
+                                <h5 class="mb-0">Intelligent Fusion Rules</h5>
+                            </div>
+                            <p>
+                                Approximation coefficients are averaged to preserve overall image structure, 
+                                while detail coefficients use maximum selection to retain sharp features 
+                                and important details.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-info text-white rounded-circle p-2 me-3">
+                                    <i class="fas fa-puzzle-piece"></i>
+                                </div>
+                                <h5 class="mb-0">Image Reconstruction</h5>
+                            </div>
+                            <p>
+                                The fused coefficients are combined using Inverse Discrete Wavelet Transform 
+                                (IDWT) to reconstruct the final image with enhanced features from all inputs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <div class="card-body">
+                            <div class="d-flex align-items-center mb-3">
+                                <div class="bg-warning text-white rounded-circle p-2 me-3">
+                                    <i class="fas fa-magic"></i>
+                                </div>
+                                <h5 class="mb-0">Enhancement</h5>
+                            </div>
+                            <p>
+                                Post-processing techniques including contrast enhancement and normalization 
+                                are applied to optimize the visual quality of the final fused image.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Applications -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold mb-4">Applications</h2>
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="text-center">
+                        <i class="fas fa-user-md fa-3x text-danger mb-3"></i>
+                        <h5>Medical Imaging</h5>
+                        <p class="text-muted">
+                            Combine CT, MRI, and PET scans for comprehensive diagnostic imaging 
+                            with enhanced anatomical and functional information.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="text-center">
+                        <i class="fas fa-satellite fa-3x text-success mb-3"></i>
+                        <h5>Remote Sensing</h5>
+                        <p class="text-muted">
+                            Merge satellite images from different sensors or time periods 
+                            for improved land use analysis and environmental monitoring.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="text-center">
+                        <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                        <h5>Security & Surveillance</h5>
+                        <p class="text-muted">
+                            Enhance surveillance footage by combining images from multiple 
+                            cameras or different lighting conditions.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Technical Specifications -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold mb-4">Technical Specifications</h2>
+            <div class="row">
+                <div class="col-lg-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h5><i class="fas fa-cogs me-2"></i>Algorithm Details</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Transform:</strong> Discrete Wavelet Transform (DWT)</li>
+                                <li><strong>Wavelet Family:</strong> Daubechies-4 (db4)</li>
+                                <li><strong>Decomposition Levels:</strong> Single level</li>
+                                <li><strong>Fusion Rules:</strong> Average + Maximum selection</li>
+                                <li><strong>Enhancement:</strong> Contrast optimization</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="card border-0 bg-light">
+                        <div class="card-body">
+                            <h5><i class="fas fa-file-image me-2"></i>Image Support</h5>
+                            <ul class="list-unstyled">
+                                <li><strong>Input Formats:</strong> JPEG, PNG, TIFF</li>
+                                <li><strong>Output Format:</strong> PNG (High Quality)</li>
+                                <li><strong>Color Support:</strong> Grayscale and RGB</li>
+                                <li><strong>Image Count:</strong> 2-10 images per fusion</li>
+                                <li><strong>Max File Size:</strong> 16MB per image</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Advantages -->
+    <div class="row">
+        <div class="col-12">
+            <h2 class="display-6 fw-bold mb-4">Why Choose Our Wavelet Fusion?</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-check-circle fa-2x text-success"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6>Superior Quality</h6>
+                            <p class="text-muted mb-0">
+                                Advanced DWT algorithm preserves fine details while maintaining overall image structure.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-zap fa-2x text-warning"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6>Fast Processing</h6>
+                            <p class="text-muted mb-0">
+                                Optimized algorithms ensure quick processing even for large images and multiple inputs.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="d-flex">
+                        <div class="flex-shrink-0">
+                            <i class="fas fa-mobile-alt fa-2x text-info"></i>
+                        </div>
+                        <div class="ms-3">
+                            <h6>User Friendly</h6>
+                            <p class="text-muted mb-0">
+                                Intuitive web interface makes professional image fusion accessible to everyone.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

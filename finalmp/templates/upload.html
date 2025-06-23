@@ -1,0 +1,443 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Images - Wavelet Fusion App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="text-center mb-5">
+                <i class="fas fa-upload fa-3x text-success mb-3"></i>
+                <h1 class="display-6">Upload Images</h1>
+                <p class="lead text-muted">Upload {{ fusion_session.num_images }} images for fusion session: <strong>{{ fusion_session.session_name }}</strong></p>
+            </div>
+
+            <!-- Progress Info -->
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h5 class="card-title mb-2">
+                                <i class="fas fa-layer-group me-2"></i>{{ fusion_session.session_name }}
+                            </h5>
+                            <p class="text-muted mb-0">
+                                <span id="imageCounter">{{ fusion_session.images|length }}/{{ fusion_session.num_images }} images uploaded</span>
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end">
+                            <div class="progress mb-2" style="height: 8px;">
+                                <div class="progress-bar bg-success" role="progressbar" 
+                                     style="width: {{ (fusion_session.images|length / fusion_session.num_images * 100)|round(0) }}%"></div>
+                            </div>
+                            <small class="text-muted">{{ (fusion_session.images|length / fusion_session.num_images * 100)|round(0) }}% Complete</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Upload Area -->
+            <div class="card border-0 shadow">
+                <div class="card-body p-5">
+                    <div class="upload-area border-2 border-dashed rounded p-5 text-center mb-4" 
+                         ondrop="handleDrop(event)" 
+                         ondragover="handleDragOver(event)" 
+                         ondragleave="handleDragLeave(event)"
+                         onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-cloud-upload-alt fa-3x text-muted mb-3"></i>
+                        <h5 class="mb-3">Drag and drop images here or click to browse</h5>
+                        <p class="text-muted mb-3">
+                            Upload {{ fusion_session.num_images - fusion_session.images|length }} more images to complete this fusion session
+                        </p>
+                        <input type="file" id="imageInput" multiple accept=".jpg,.jpeg,.png,.tiff,.tif" 
+                               style="display: none;" onchange="handleFileSelect(event)">
+                        <button type="button" class="btn btn-outline-primary">
+                            <i class="fas fa-folder-open me-2"></i>Browse Files
+                        </button>
+                    </div>
+
+                    <!-- Supported Formats -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-file-image me-2"></i>Supported Formats</h6>
+                            <div class="d-flex gap-2 flex-wrap">
+                                <span class="badge bg-secondary">JPEG</span>
+                                <span class="badge bg-secondary">PNG</span>
+                                <span class="badge bg-secondary">TIFF</span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h6><i class="fas fa-info-circle me-2"></i>File Requirements</h6>
+                            <p class="small text-muted mb-0">
+                                Maximum size: 16MB per image<br>
+                                Images will be automatically resized to match
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Image Preview Grid -->
+                    <div id="imagePreview" class="row g-3 mb-4">
+                        {% for image in fusion_session.images %}
+                        <div class="col-md-4 mb-3 fade-in">
+                            <div class="card image-preview">
+                                <img src="{{ url_for('static', filename='../uploads/' + image.filename) }}" 
+                                     alt="{{ image.original_filename }}" class="card-img-top">
+                                <div class="card-body p-2">
+                                    <p class="small mb-0 text-truncate" title="{{ image.original_filename }}">
+                                        {{ image.original_filename }}
+                                    </p>
+                                    <small class="text-muted">{{ (image.file_size / 1024 / 1024)|round(2) }} MB</small>
+                                </div>
+                                <button class="remove-btn" onclick="removeImage('{{ image.filename }}')">
+                                    <i class="fas fa-times"></i>
+                                </button>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="text-center">
+                        <div class="btn-group">
+                            <button id="processBtn" 
+                                    class="btn btn-success btn-lg" 
+                                    onclick="processFusion()" 
+                                    {% if fusion_session.images|length < fusion_session.num_images %}disabled{% endif %}>
+                                <i class="fas fa-cog me-2"></i>
+                                {% if fusion_session.images|length < fusion_session.num_images %}
+                                    Upload {{ fusion_session.num_images - fusion_session.images|length }} more images
+                                {% else %}
+                                    Process Fusion
+                                {% endif %}
+                            </button>
+                            <a href="{{ url_for('dashboard') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Processing Modal -->
+<div class="modal fade" id="processingModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-body text-center py-5">
+                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
+                    <span class="visually-hidden">Processing...</span>
+                </div>
+                <h4>Processing Fusion</h4>
+                <p class="text-muted">Applying DWT algorithm to combine your images...</p>
+                <div class="progress mx-auto" style="width: 300px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Set the fusion session ID for JavaScript functions
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof setFusionSessionId === 'function') {
+        setFusionSessionId({{ fusion_session.id }});
+    } else {
+        // Fallback: set global variable
+        window.fusionSessionId = {{ fusion_session.id }};
+    }
+});
+
+// Custom file processing for this page
+function processFiles(files) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/tiff'];
+    const maxSize = 16 * 1024 * 1024; // 16MB
+    const currentCount = {{ fusion_session.images|length }};
+    const totalNeeded = {{ fusion_session.num_images }};
+    
+    if (currentCount >= totalNeeded) {
+        showAlert('Maximum number of images already uploaded', 'warning');
+        return;
+    }
+    
+    Array.from(files).forEach((file, index) => {
+        if (currentCount + index >= totalNeeded) {
+            showAlert('Cannot upload more than ' + totalNeeded + ' images', 'warning');
+            return;
+        }
+        
+        if (!allowedTypes.includes(file.type)) {
+            showAlert('Invalid file type: ' + file.name + '. Only JPEG, PNG, and TIFF are supported.', 'error');
+            return;
+        }
+        
+        if (file.size > maxSize) {
+            showAlert('File too large: ' + file.name + ' (maximum 16MB)', 'error');
+            return;
+        }
+        
+        uploadFileToSession(file);
+    });
+}
+
+// Global variables for this page
+let uploadSessionId = {{ fusion_session.id }};
+
+// Missing drag and drop functions for this page
+let processingInProgress = false;
+
+function handleDragOver(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+    const dropArea = document.getElementById('dropArea');
+    if (dropArea) {
+        dropArea.classList.add('drag-over');
+    }
+}
+
+function handleDragLeave(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropArea = document.getElementById('dropArea');
+    if (dropArea && !dropArea.contains(e.relatedTarget)) {
+        dropArea.classList.remove('drag-over');
+    }
+}
+
+function handleDrop(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    const dropArea = document.getElementById('dropArea');
+    if (dropArea) {
+        dropArea.classList.remove('drag-over');
+    }
+    
+    const files = Array.from(e.dataTransfer.files);
+    processFiles(files);
+}
+
+function handleFileSelect(e) {
+    const files = Array.from(e.target.files);
+    processFiles(files);
+}
+
+// Override the default processFusion function for this page
+function processFusion() {
+    if (processingInProgress) return;
+    
+    const currentCount = document.querySelectorAll('.image-preview').length;
+    const totalNeeded = {{ fusion_session.num_images }};
+    
+    if (currentCount < totalNeeded) {
+        showAlert('Please upload ' + (totalNeeded - currentCount) + ' more images before processing', 'warning');
+        return;
+    }
+    
+    processingInProgress = true;
+    const processBtn = document.getElementById('processBtn');
+    
+    // Update button state
+    processBtn.disabled = true;
+    processBtn.innerHTML = '<i class="fas fa-cog fa-spin me-2"></i>Processing...';
+    
+    // Show processing modal
+    const modal = new bootstrap.Modal(document.getElementById('processingModal'));
+    modal.show();
+    
+    fetch(`/process_fusion/${uploadSessionId}`, {
+        method: 'POST'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Redirect to result page
+            window.location.href = data.result_url;
+        } else {
+            modal.hide();
+            showAlert(data.error, 'error');
+            processBtn.disabled = false;
+            processBtn.innerHTML = '<i class="fas fa-cog me-2"></i>Process Fusion';
+            processingInProgress = false;
+        }
+    })
+    .catch(error => {
+        modal.hide();
+        showAlert('Processing failed: ' + error.message, 'error');
+        processBtn.disabled = false;
+        processBtn.innerHTML = '<i class="fas fa-cog me-2"></i>Process Fusion';
+        processingInProgress = false;
+    });
+}
+
+// Upload file function specific to this page
+function uploadFileToSession(file) {
+    const formData = new FormData();
+    formData.append('file', file);
+    
+    // Show upload progress
+    const progressContainer = createProgressIndicator(file.name);
+    const previewContainer = document.getElementById('imagePreview');
+    if (previewContainer) {
+        previewContainer.appendChild(progressContainer);
+    }
+    
+    fetch(`/upload_file/${uploadSessionId}`, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Remove progress indicator
+            progressContainer.remove();
+            
+            // Add image preview
+            addImagePreview(data);
+            
+            // Update counter
+            updateImageCounter(data.current_count, data.total_needed);
+            
+            // Enable process button if all images uploaded
+            if (data.current_count >= data.total_needed) {
+                enableProcessButton();
+            }
+        } else {
+            progressContainer.remove();
+            showAlert(data.error, 'error');
+        }
+    })
+    .catch(error => {
+        progressContainer.remove();
+        showAlert('Upload failed: ' + error.message, 'error');
+    });
+}
+
+// Update image counter after upload
+function updateImageCounter(current, total) {
+    const counter = document.getElementById('imageCounter');
+    if (counter) {
+        counter.textContent = `${current}/${total} images uploaded`;
+    }
+    
+    // Update progress bar
+    const progressBar = document.querySelector('.progress-bar');
+    if (progressBar) {
+        const percentage = (current / total * 100);
+        progressBar.style.width = percentage + '%';
+        progressBar.nextElementSibling.textContent = Math.round(percentage) + '% Complete';
+    }
+    
+    // Update process button
+    const processBtn = document.getElementById('processBtn');
+    if (processBtn) {
+        if (current >= total) {
+            processBtn.disabled = false;
+            processBtn.innerHTML = '<i class="fas fa-cog me-2"></i>Process Fusion';
+        } else {
+            processBtn.disabled = true;
+            processBtn.innerHTML = `<i class="fas fa-cog me-2"></i>Upload ${total - current} more images`;
+        }
+    }
+}
+
+// Helper functions for this page
+function createProgressIndicator(filename) {
+    const div = document.createElement('div');
+    div.className = 'col-md-4 mb-3';
+    div.innerHTML = `
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="spinner-border text-primary mb-2" role="status">
+                    <span class="visually-hidden">Uploading...</span>
+                </div>
+                <p class="small mb-0">${filename}</p>
+                <div class="progress mt-2">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 100%"></div>
+                </div>
+            </div>
+        </div>
+    `;
+    return div;
+}
+
+function addImagePreview(data) {
+    const previewContainer = document.getElementById('imagePreview');
+    const imageDiv = document.createElement('div');
+    imageDiv.className = 'col-md-4 mb-3 fade-in';
+    
+    imageDiv.innerHTML = `
+        <div class="card image-preview">
+            <img src="/uploads/${data.filename}" alt="${data.original_filename}" class="card-img-top">
+            <div class="card-body p-2">
+                <p class="small mb-0 text-truncate" title="${data.original_filename}">
+                    ${data.original_filename}
+                </p>
+            </div>
+            <button class="remove-btn" onclick="removeImage('${data.filename}')">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    previewContainer.appendChild(imageDiv);
+}
+
+function removeImage(filename) {
+    const imageElements = document.querySelectorAll('.image-preview img');
+    imageElements.forEach(img => {
+        if (img.src.includes(filename)) {
+            img.closest('.col-md-4').remove();
+        }
+    });
+    
+    const currentCount = document.querySelectorAll('.image-preview').length;
+    const totalNeeded = {{ fusion_session.num_images }};
+    updateImageCounter(currentCount, totalNeeded);
+    
+    if (currentCount < totalNeeded) {
+        disableProcessButton();
+    }
+}
+
+function enableProcessButton() {
+    const processBtn = document.getElementById('processBtn');
+    if (processBtn) {
+        processBtn.disabled = false;
+        processBtn.innerHTML = '<i class="fas fa-cog me-2"></i>Process Fusion';
+    }
+}
+
+function disableProcessButton() {
+    const processBtn = document.getElementById('processBtn');
+    if (processBtn) {
+        processBtn.disabled = true;
+        const currentCount = document.querySelectorAll('.image-preview').length;
+        const totalNeeded = {{ fusion_session.num_images }};
+        processBtn.innerHTML = `<i class="fas fa-cog me-2"></i>Upload ${totalNeeded - currentCount} more images`;
+    }
+}
+
+function showAlert(message, type = 'info') {
+    const alertContainer = document.createElement('div');
+    alertContainer.className = `alert alert-${type === 'error' ? 'danger' : type} alert-dismissible fade show`;
+    alertContainer.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    const container = document.querySelector('.container');
+    if (container) {
+        container.insertBefore(alertContainer, container.firstChild);
+        
+        setTimeout(() => {
+            alertContainer.remove();
+        }, 5000);
+    }
+}
+</script>
+{% endblock %}
